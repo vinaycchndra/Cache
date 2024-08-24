@@ -9,6 +9,9 @@ type cache struct {
 }
 
 func Initialise_Cache(max_length int32) *cache {
+	if max_length < 2 {
+		panic("The Cache Size Can Not Less Than 2..........")
+	}
 	return &cache{
 		hashmap:    make(map[string]*node),
 		queue:      newQueue(),
@@ -18,7 +21,6 @@ func Initialise_Cache(max_length int32) *cache {
 
 func (c *cache) Get(key string) string {
 	node, ok := c.hashmap[key]
-
 	if ok {
 		c.queue.addExistingToBegining(node)
 	} else {

@@ -7,22 +7,33 @@ type queue struct {
 }
 
 func newQueue() *queue {
-	queue := queue{head: newNode(), tail: newNode(), length: 0}
+	head_init := newNode()
+	tail_init := newNode()
+	head_init.right = tail_init
+	tail_init.left = head_init
+	queue := queue{head: head_init, tail: tail_init, length: 2}
 	return &queue
 }
 
 func (q *queue) removeNode(node *node) {
+
 	if node == q.tail {
 		node.left.right = nil
+		q.length--
 
 	} else if node != q.head {
 		node.left.right = node.right
 		node.right.left = node.left
+		q.length--
 	}
 }
 
 func (q *queue) addExistingToBegining(node *node) {
 	q.removeNode(node)
+	q.length++
+	q.head.left = node
+	node.right = q.head
+	node.left = nil
 	q.head = node
 }
 
