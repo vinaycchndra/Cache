@@ -1,38 +1,46 @@
 package cache
 
-type Node struct {
-	Val   string
-	Left  *Node
-	Right *Node
+import "fmt"
+
+type cache struct {
+	hashmap    map[string]*node
+	queue      *queue
+	max_length int32
 }
 
-type queue struct {
-	head   *Node
-	tail   *Node
-	length int32
-}
-
-type Cache struct {
-	hashmap map[string]*Node
-	queue   *queue
-}
-
-func NewCache() *Cache {
-	return &Cache{
-		hashmap: make(map[string]*Node),
-		queue:   NewQueue(),
+func Initialise_Cache(max_length int32) *cache {
+	return &cache{
+		hashmap:    make(map[string]*node),
+		queue:      newQueue(),
+		max_length: max_length,
 	}
 }
 
-func NewQueue() *queue {
-	queue := queue{head: NewNode(), tail: NewNode(), length: 0}
-	return &queue
+func (c *cache) Get(key string) string {
+	node, ok := c.hashmap[key]
+
+	if ok {
+		c.queue.addExistingToBegining(node)
+	} else {
+
+		if c.queue.length == c.max_length {
+			rmv_node := c.queue.tail
+			c.queue.removeNode(rmv_node)
+			delete(c.hashmap, rmv_node.val)
+		}
+
+		node = c.queue.addNewValueToBegining(key)
+		c.hashmap[key] = node
+	}
+	return node.val
 }
 
-func NewNode() *Node {
-	node := Node{
-		Left:  nil,
-		Right: nil,
+func (c *cache) Display() {
+	node := c.queue.head
+	var i int32
+	for i = 0; i < c.queue.length; i++ {
+		fmt.Printf("{%s}-->", node.val)
+		node = node.right
 	}
-	return &node
+	fmt.Println()
 }

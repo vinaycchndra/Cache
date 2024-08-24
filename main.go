@@ -5,6 +5,21 @@ import (
 )
 
 func main() {
-	node := cache.NewNode("Hello We are ready to Go ! with a brand new start value")
-	node.Display()
+	cache := cache.Initialise_Cache(10)
+	cache.Get("www.google.com")
+	cache.Display()
+	cache.Get("www.yahoo.com")
+	cache.Display()
+	cache.Get("www.google.com")
+	cache.Display()
+	cache.Get("www.yahoo.com")
+	cache.Display()
+	cache.Get("www.google.com")
+	cache.Display()
+	cache.Get("www.yahoo.com")
+	cache.Display()
+	cache.Get("www.google.com")
+	cache.Display()
+	cache.Get("www.yahoo.com")
+	cache.Display()
 }
