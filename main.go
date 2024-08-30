@@ -1,11 +1,9 @@
 package main
 
-import (
-	"github.com/LRU_cache/cache"
-)
+import "github.com/Cache/lru_cache"
 
 func main() {
-	cache := cache.Initialise_Cache(5)
+	cache := lru_cache.Initialise_Cache(5)
 	cache.Get("www.google.com")
 	cache.Display()
 	cache.Get("www.yahoo.com")
