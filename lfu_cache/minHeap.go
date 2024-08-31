@@ -1,5 +1,9 @@
 package lfu_cache
 
+import (
+	"errors"
+)
+
 // type Item any
 
 // func (i *Item) lessThan(j *Item) bool {
@@ -17,6 +21,9 @@ type minHeap struct {
 }
 
 func newMinHeap(max_heap_size int32) *minHeap {
+	if max_heap_size == int32(0) {
+		max_heap_size = int32(1)
+	}
 	heap := make([]*Item, 0, max_heap_size)
 	return &minHeap{max_heap_size: max_heap_size, current_size: 0, heap: heap}
 }
@@ -61,15 +68,55 @@ func (h *minHeap) heapify(index int) {
 	}
 }
 
-func (h *minHeap) heapPop() {
+func (h *minHeap) heapPop() *Item {
+	if h.Len() == 0 {
+		return nil
+	}
+	// Swapping the last and first element since first element needs to be popped.
+	index := h.Len() - int32(1)
 
+	item := h.heap[0]
+
+	h.heap[0] = h.heap[index]
+
+	// Deleting Last Element Since it is now at the beginning.
+	h.heap[index] = nil
+	h.current_size--
+
+	// Heapifying the slice since it is not in minHeap order
+	h.heapify(0)
+	return item
+}
+
+func (h *minHeap) heapPush(item *Item) error {
+	if h.Len() == h.max_heap_size {
+		return errors.New("Heap Size Over Flow Can Not Add New Item")
+	}
+
+	// Assigning the new item at the last index
+	index := h.Len()
+	h.heap[index] = item
+	h.current_size++
+	current_item := *item
+
+	for index > 0 {
+		parent_index := (index - int32(1)) / int32(2)
+		parent := h.heap[parent_index]
+
+		if current_item.lessThan(parent) {
+			h.swap(index, parent_index)
+			index = parent_index
+		} else {
+			break
+		}
+	}
+	return nil
 }
 
 func (h *minHeap) swap(i, j int32) {
 	temp := h.heap[i]
 	h.heap[i] = h.heap[j]
 	h.heap[j] = temp
-
 }
 
 func (h *minHeap) Len() int32 {
