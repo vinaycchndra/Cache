@@ -1,18 +1,12 @@
 package lfu_cache
 
-import (
-	"errors"
-)
+import "errors"
 
 // type Item any
 
 // func (i *Item) lessThan(j *Item) bool {
 
 // }
-
-type Item interface {
-	lessThan(*Item) bool
-}
 
 type minHeap struct {
 	max_heap_size int32
@@ -24,12 +18,12 @@ func newMinHeap(max_heap_size int32) *minHeap {
 	if max_heap_size == int32(0) {
 		max_heap_size = int32(1)
 	}
-	heap := make([]*Item, 0, max_heap_size)
-	return &minHeap{max_heap_size: max_heap_size, current_size: 0, heap: heap}
+	heap := make([]*Item, max_heap_size)
+	return &minHeap{max_heap_size: max_heap_size, current_size: int32(0), heap: heap}
 }
 
 // Heapifying the slice
-func (h *minHeap) heapify(index int) {
+func (h *minHeap) heapify(index int32) {
 	i := int32(index)
 
 	for i < h.Len() {
@@ -90,6 +84,8 @@ func (h *minHeap) heapPop() *Item {
 
 func (h *minHeap) heapPush(item *Item) error {
 	if h.Len() == h.max_heap_size {
+		// We are throwing an error from here while pushing to notify the client that a item can not be removed auto
+		// since removing it will not mantain the consistency with the key in the cache map
 		return errors.New("Heap Size Over Flow Can Not Add New Item")
 	}
 
@@ -97,15 +93,16 @@ func (h *minHeap) heapPush(item *Item) error {
 	index := h.Len()
 	h.heap[index] = item
 	h.current_size++
-	current_item := *item
-
-	for index > 0 {
+	current_item := item
+	current_item.setIndex(index)
+	for index > int32(0) {
 		parent_index := (index - int32(1)) / int32(2)
 		parent := h.heap[parent_index]
 
 		if current_item.lessThan(parent) {
 			h.swap(index, parent_index)
 			index = parent_index
+			current_item = parent
 		} else {
 			break
 		}
@@ -117,6 +114,12 @@ func (h *minHeap) swap(i, j int32) {
 	temp := h.heap[i]
 	h.heap[i] = h.heap[j]
 	h.heap[j] = temp
+	obj_j := h.heap[j]
+	// Setting swapped indices into the item since we need these index to directly heapify from the cache.
+	obj_j.setIndex(j)
+	obj_i := h.heap[i]
+	obj_i.setIndex(i)
+
 }
 
 func (h *minHeap) Len() int32 {
